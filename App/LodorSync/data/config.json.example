@@ -1,0 +1,14 @@
+{
+  "hosts": [
+    {
+      "root_uri": "https://romm.example.com",
+      "port": 0,
+      "token": "PASTE_ROMM_CLIENT_TOKEN_HERE",
+      "device_id": 0,
+      "device_name": "miniplus-onion"
+    }
+  ],
+  "mirror_mode": "own",
+  "api_timeout": 30,
+  "download_timeout": 3600
+}

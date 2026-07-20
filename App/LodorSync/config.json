@@ -1,0 +1,6 @@
+{
+  "label": "Lodor Sync",
+  "icon": "icon.png",
+  "launch": "launch.sh",
+  "description": "Sync your RomM library - stub-mirror, download-on-launch, save sync"
+}

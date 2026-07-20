@@ -1,0 +1,40 @@
+#!/bin/sh
+# romm-syncd - periodic, charging-gated, Wi-Fi-dark save sync for OnionOS.  MARKER: LODOR_SYNCD
+#
+# A tiny POSIX-sh loop (NOT a resident process - holds ~nothing, spawns the short-lived
+# engine per cycle). Launched DETACHED from .tmp_update/startup/ so it never delays boot.
+# Polls every POLL s, acts at most every INTERVAL s, and only when ALL gates hold: charging,
+# not in a game, credentials present, and the pending queue is non-empty. It PUSHES the
+# offline queue; it never pulls (pulls happen around launch / from the app, where context
+# is known). Saves are discovered by the engine's glob across every core folder.
+set -u
+SELF_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+. "$SELF_DIR/../lib/romm-sync-lib.sh"
+lodor_export_env
+
+POLL=60
+INTERVAL="${ROMM_SYNC_INTERVAL:-1800}"   # act at most every 30 min
+last_attempt=$(date +%s)
+
+trap 'rm -f "$INGAME_LOCK" 2>/dev/null' EXIT INT TERM HUP QUIT
+
+log "romm-syncd started (interval=${INTERVAL}s, poll=${POLL}s)"
+
+while :; do
+	sleep "$POLL"
+	now=$(date +%s)
+	[ $((now - last_attempt)) -ge "$INTERVAL" ] || continue
+	is_charging   || continue
+	not_in_game   || continue
+	creds_present || continue
+	[ -s "$PENDING" ] || { last_attempt=$(date +%s); continue; }
+
+	last_attempt=$(date +%s)
+	if wifi_bring_up; then
+		out="$(lodor_engine --push-pending 2>&1)"; rc=$?
+		printf '%s\n' "$out" >> "$LOG"
+		log "push-pending rc=$rc"
+	else
+		log "wifi unavailable; retry next interval"
+	fi
+done
