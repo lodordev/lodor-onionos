@@ -1,0 +1,17 @@
+# Download-on-launch: a 0-byte stub means the ROM isn't on the card -> the wrap brings the
+# engine in (--download, now via run_with_progress for a REAL engine-driven bar + retry-resume,
+# T1.3), the stub fills in place, and the stock launcher runs the real file. The progress panel
+# is engine-driven (its appearance races the instant stub), so we assert the STABLE observables:
+# the --download call, the filled file, and the stock hand-off (parity with m-menu-sync-now).
+desc fetch: 0-byte stub -> --download fills it, stock launcher runs
+invoke wrap
+config paired
+wifi up
+sdfile Roms/GBA/Zelda.gba
+engine 0|RESULT downloaded=1
+engine 0|LOCAL=none
+engine 0|RESULT mode=list-states n=0
+expect_exit 0
+expect_trace ENGINE --download
+expect_file_has Roms/GBA/Zelda.gba DLBYTES
+expect_trace STOCK GBA rom=

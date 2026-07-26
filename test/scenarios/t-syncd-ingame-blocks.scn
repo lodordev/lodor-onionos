@@ -1,0 +1,13 @@
+# The in-game gate: a LIVE game session (live-pid /tmp/romm-in-game) blocks the daemon —
+# it must never fight the player for the radio mid-play.
+desc syncd: live in-game lock -> daemon stays dark
+invoke syncd
+timeout 6
+charging on
+ingame
+config paired
+wifi up
+pending Roms/GBA/Zelda.gba
+expect_timeout
+expect_log romm-syncd started
+expect_trace_absent ENGINE

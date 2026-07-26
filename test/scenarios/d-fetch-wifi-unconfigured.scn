@@ -1,0 +1,15 @@
+# Wi-Fi never configured in OnionOS (no /appconfigs/wpa_supplicant.conf): wifi_bring_up
+# returns 2 -> the SPECIFIC "set up Wi-Fi in OnionOS" message, no engine call, no launch
+# of the empty stub. (We never reimplement OnionOS's keyboard/creds flow.)
+desc fetch: Wi-Fi not set up in OnionOS -> honest rc=2 message, no download, no launch
+invoke wrap
+config paired
+wifi down
+sdfile Roms/GBA/Zelda.gba
+expect_exit 0
+expect_trace_absent ENGINE --download
+expect_trace PANEL mode=auto title='Can't download'
+expect_trace Wi-Fi isn't set up
+expect_file_empty Roms/GBA/Zelda.gba
+expect_trace_absent STOCK
+expect_log fetch-on-launch: Wi-Fi not configured in OnionOS

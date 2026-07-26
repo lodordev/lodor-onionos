@@ -1,0 +1,16 @@
+# The idle watchdog (LC_IDLE=15s, scaled): the prompt NEVER returns (hang) -> the card
+# must auto-Play instead of trapping the Mini before a game. The scenario passing at all
+# (instead of TIMEOUT) proves the watchdog fires and the launch proceeds.
+desc launch card: prompt never returns -> idle watchdog auto-Plays, no trap
+invoke wrap
+config paired
+wifi up
+sdfile+ Roms/GBA/Zelda.gba
+engine 0|101\t2026-07-01 10:00\tBrick\t32KB\tCURRENT\nLOCAL=current
+engine 0|RESULT mode=list-states n=0
+pick hang
+expect_exit 0
+expect_trace HANG (waiting for the watchdog)
+expect_trace STOCK GBA rom=
+expect_trace_absent ENGINE --sync-save
+expect_log card action=play (cancel/idle)

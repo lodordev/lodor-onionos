@@ -1,0 +1,19 @@
+# Multi-disc pass-through: a 0-byte .m3u stub downloads via the SAME wrap path; the engine
+# owns the multi-disc shape (populated .m3u + discs in the dot-hidden per-game folder —
+# never a bare disc at the Roms root) and the stock launcher gets the .m3u.
+desc fetch: multi-disc .m3u stub -> engine folder-per-game shape, launches the .m3u
+invoke wrap
+tag PS
+romarg Roms/PS/ChronoCross.m3u
+config paired
+wifi up
+sdfile Roms/PS/ChronoCross.m3u
+engine 0|RESULT downloaded=1 discs_present=1
+engine 0|LOCAL=none
+engine 0|RESULT mode=list-states n=0
+expect_exit 0
+expect_trace ENGINE --download
+expect_file_has Roms/PS/ChronoCross.m3u (Disc 1)
+expect_file Roms/PS/.ChronoCross/ChronoCross (Disc 1).chd
+expect_trace STOCK PS rom=
+expect_trace ChronoCross.m3u'

@@ -1,0 +1,13 @@
+# The daemon's whole job: charging + pending queue + Wi-Fi -> take the transfer mutex (bg),
+# --push-pending, log the honest rc.
+desc syncd: charging + pending + wifi -> --push-pending flush
+invoke syncd
+timeout 8
+charging on
+config paired
+wifi up
+pending Roms/GBA/Zelda.gba
+engine 0|RESULT pushed=1
+expect_timeout
+expect_trace ENGINE --push-pending
+expect_log push-pending rc=0

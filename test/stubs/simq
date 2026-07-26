@@ -1,0 +1,19 @@
+#!/bin/sh
+# simq <queue-name> — pop the next scripted line from $LODOR_SIM_DIR/q/<name>.q.
+# STICKY-LAST semantics: while >1 line remains, pop FIFO; the final line is never consumed
+# (repeated polls / menu redraws keep receiving it). A missing/empty queue exits 1 with no
+# output so stubs can fail loudly (UNDERRUN) instead of looping forever.
+set -u
+d="${LODOR_SIM_DIR:?LODOR_SIM_DIR unset}/q"
+n="${1:?queue name}"
+q="$d/$n.q"
+mkdir -p "$d" 2>/dev/null
+exec 9>"$d/.lock"
+flock -x 9
+[ -s "$q" ] || exit 1
+first="$(head -n1 "$q")"
+if [ "$(wc -l < "$q")" -gt 1 ]; then
+	tail -n +2 "$q" > "$q.tmp" && mv "$q.tmp" "$q"
+fi
+printf '%s\n' "$first"
+exit 0

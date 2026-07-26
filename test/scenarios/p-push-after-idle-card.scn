@@ -1,0 +1,17 @@
+# The push bracket is NOT conditional on card interaction: the card idle-auto-Played
+# (prompt hung, watchdog fired) and the post-game push STILL runs.
+desc push: card idle-auto-played + save changed -> push still fires
+invoke wrap
+config paired
+wifi up
+sdfile+ Roms/GBA/Zelda.gba
+stockwrites Saves/CurrentProfile/saves/mGBA/Zelda.srm
+engine 0|101\t2026-07-01 10:00\tBrick\t32KB\tCURRENT\nLOCAL=current
+engine 0|RESULT mode=list-states n=0
+engine 0|RESULT pushed=1
+pick hang
+expect_exit 0
+expect_trace HANG (waiting for the watchdog)
+expect_log card action=play (cancel/idle)
+expect_trace ENGINE --sync-save
+expect_log save-push rc=0

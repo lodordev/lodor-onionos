@@ -1,0 +1,17 @@
+# Pairing self-heal at the engine funnel: a token-only config (cloned/preseeded card, no
+# device identity) would silently never sync saves — the save-mode funnel registers the
+# device FIRST, then pulls. Config gains device_name.
+desc app menu: Pull saves on a token-only config -> --register-device heal, then --pull-saves
+invoke app
+config token
+wifi up
+engine 0|registered=1
+engine 0|PULL saves=2\nRESULT ok
+pick 3
+pick 255
+expect_exit 0
+expect_trace ENGINE --register-device
+expect_trace ENGINE --pull-saves
+expect_config_has "device_name": "stub-device"
+expect_trace PANEL mode=auto title='Saves pulled'
+expect_trace PULL saves=2

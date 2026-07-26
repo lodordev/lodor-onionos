@@ -1,0 +1,10 @@
+# Even with nothing to wrap, the boot daemon hook (startup/) and the shutdown reaper
+# (checkoff/) are installed — OnionOS runs every *.sh in those dirs.
+desc seed: boot + shutdown hooks installed even with no systems to wrap
+invoke seed
+expect_exit 0
+expect_file_has .tmp_update/startup/lodor.sh MARKER: LODOR_BOOT
+expect_file_has .tmp_update/startup/lodor.sh romm-syncd
+expect_file_lines .tmp_update/startup/lodor.sh 4
+expect_file_has .tmp_update/checkoff/lodor.sh MARKER: LODOR_CHECKOFF
+expect_log seed: wrapped=0 skipped=0

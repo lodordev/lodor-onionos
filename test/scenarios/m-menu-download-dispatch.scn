@@ -1,0 +1,20 @@
+# "Download a game": system picker (bare-tag Roms folders with counts) -> title picker ->
+# the engine gets --download with the EXACT card path; success fills the stub.
+desc app menu: Download a game -> system/title pickers dispatch --download <path>
+invoke app
+config paired
+wifi up
+sdfile Roms/GBA/Zelda.gba
+engine 0|RESULT downloaded=1
+pick 2
+pick 0
+pick 0
+pick 255
+expect_exit 0
+expect_trace PROMPT[Download — pick a system]
+expect_trace GBA  (1)
+expect_trace PROMPT[Pick a game to download]
+expect_trace ENGINE --download
+expect_trace Zelda.gba -> rc=0
+expect_file_has Roms/GBA/Zelda.gba DLBYTES
+expect_trace PANEL mode=auto title='Downloaded'

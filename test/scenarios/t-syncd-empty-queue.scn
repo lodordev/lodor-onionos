@@ -1,0 +1,18 @@
+# Empty pending queue on a CHARGING pass: no --push-pending (nothing to flush), but the daemon
+# still does its charging-pass background library work — --mirror-catalog then --prefetch-large
+# (T2.1: pre-warm large disc-image stubs off the launch path). It still never PULLS saves.
+desc syncd: empty queue on charge -> no push-pending, but mirror-catalog + prefetch-large
+invoke syncd
+timeout 8
+charging on
+config paired
+wifi up
+engine 0|MIRROR created=0 updated=0
+engine 0|RESULT prefetch_roms=0 fetched=0 failed=0
+expect_timeout
+expect_log romm-syncd started
+expect_trace_absent ENGINE --push-pending
+expect_trace ENGINE --mirror-catalog
+expect_trace ENGINE --prefetch-large
+expect_log mirror-catalog rc=0
+expect_log prefetch-large rc=0

@@ -1,0 +1,13 @@
+# Onboarding path AS SHIPPED on this lane: there is no wizard — no config means every
+# networked action shows the honest "Not configured / edit config.json on the card"
+# message and NOTHING is dispatched. (The task-description wizard is a reported drift.)
+desc app menu: no config -> honest "Not configured", no engine call
+invoke app
+config none
+pick 0
+pick 255
+expect_exit 0
+expect_trace PROMPT[Lodor]
+expect_trace msg='Not configured
+expect_trace App/LodorSync/data/config.json
+expect_trace_absent ENGINE

@@ -1,0 +1,14 @@
+# The fleet transfer mutex: a LIVE foreign holder -> the daemon logs BUSY, does NOT preempt
+# (bg never preempts), does NOT consume its timer, and makes no engine call.
+desc syncd: live mutex holder -> BUSY logged, no preempt, no engine call
+invoke syncd
+timeout 6
+charging on
+holdmutex
+config paired
+wifi up
+pending Roms/GBA/Zelda.gba
+expect_timeout
+expect_log wifi_acquire BUSY
+expect_log transfer mutex busy (another actor); retry next poll
+expect_trace_absent ENGINE

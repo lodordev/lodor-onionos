@@ -1,0 +1,11 @@
+# Offline: the wrapper gates the card on wifi_is_up -> NO server probe, NO card, and the
+# game still launches. Nothing ever claims "no saves" (the probes never ran).
+desc launch card: offline -> no probe, no card, game still launches
+invoke wrap
+config paired
+wifi down
+sdfile+ Roms/GBA/Zelda.gba
+expect_exit 0
+expect_trace_absent ENGINE --list-saves
+expect_trace_absent PROMPT[
+expect_trace STOCK GBA rom=

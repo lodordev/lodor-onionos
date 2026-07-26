@@ -1,0 +1,14 @@
+# Failure contract: the download fails and the file is still empty -> honest failure panel,
+# the 0-byte stub is left intact, and the STOCK LAUNCHER IS NEVER RUN on an empty file.
+desc fetch: download fails -> honest error, stub intact, NO launch of a 0-byte file
+invoke wrap
+config paired
+wifi up
+sdfile Roms/GBA/Zelda.gba
+engine 4|DLFAIL getrom
+expect_exit 0
+expect_trace ENGINE --download
+expect_trace PANEL mode=auto title='Download failed'
+expect_file_empty Roms/GBA/Zelda.gba
+expect_trace_absent STOCK
+expect_log fetch-on-launch FAILED

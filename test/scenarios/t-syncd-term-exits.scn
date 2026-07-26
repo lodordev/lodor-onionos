@@ -1,0 +1,12 @@
+# SIGTERM must END the daemon (the trap exits with 143 since the 2026-07-22 fix). Before
+# the fix the trap cleaned up (lock removed, mutex released) and the loop KEPT RUNNING
+# with its own gates opened — post-TERM sync cycles, reproduced live by this harness.
+desc syncd: SIGTERM -> clean exit 143, no post-TERM loop
+invoke syncd
+timeout 8
+termsig 1
+charging on
+config paired
+wifi up
+engine 0|RESULT pushed=1
+expect_exit 143

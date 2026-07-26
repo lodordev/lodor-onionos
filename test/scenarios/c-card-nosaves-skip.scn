@@ -1,0 +1,15 @@
+# Nothing to offer (no saves, no states): a one-row Play card is friction -> the card is
+# skipped entirely, honestly logged, and the game launches. No first-play pull either
+# (there is no server save to pull).
+desc launch card: no saves + no states -> card skipped, straight to launch
+invoke wrap
+config paired
+wifi up
+sdfile+ Roms/GBA/Zelda.gba
+engine 0|LOCAL=none
+engine 0|RESULT mode=list-states n=0
+expect_exit 0
+expect_trace_absent PROMPT[
+expect_trace_absent ENGINE --sync-save
+expect_trace STOCK GBA rom=
+expect_log card skipped (only Play

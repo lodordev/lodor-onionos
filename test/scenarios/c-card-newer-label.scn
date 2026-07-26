@@ -1,0 +1,14 @@
+# The "(newer available)" label comes STRAIGHT off the LOCAL= trailer of --list-saves:
+# LOCAL=older -> the save row honestly says a newer server save exists.
+desc launch card: LOCAL=older -> "Restore save (newer available)" label
+invoke wrap
+config paired
+wifi up
+sdfile+ Roms/GBA/Zelda.gba
+engine 0|202\t2026-07-02 08:00\tFlip\t33KB\nLOCAL=older
+engine 0|RESULT mode=list-states n=0
+pick 255
+expect_exit 0
+expect_trace Restore save (newer available)
+expect_trace_absent Restore latest save
+expect_trace STOCK GBA rom=

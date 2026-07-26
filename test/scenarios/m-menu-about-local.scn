@@ -1,0 +1,16 @@
+# About lives in the Settings submenu now (top -> Settings -> About). It shows the LIVE engine
+# version (T1.4: lodor_engine --version) + last-sync + library + pending count. The only engine
+# call is --version (no network); the info panel renders the resolved version.
+desc app menu: Settings -> About -> live version panel via --version
+invoke app
+config paired
+wifi up
+engine 0|lodor-sync 9.9.9-test
+pick 5
+pick 4
+pick 255
+expect_exit 0
+expect_trace PROMPT[Settings]
+expect_trace ENGINE --version
+expect_trace PANEL mode=auto title='About Lodor'
+expect_trace Version 9.9.9-test

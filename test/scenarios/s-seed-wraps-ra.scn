@@ -1,0 +1,13 @@
+# The no-fork seam: lodor-seed.sh wraps a RetroArch system's Emu/<TAG>/launch.sh, preserving
+# the stock beside it, and installs the boot + shutdown hooks.
+desc seed: RetroArch system wrapped, stock preserved, hooks installed
+invoke seed
+emu GBA ra
+sdfile Roms/GBA/Zelda.gba
+expect_exit 0
+expect_file_has Emu/GBA/launch.sh MARKER: LODOR_ONION_LAUNCH
+expect_file_has Emu/GBA/launch.stock.sh stock OnionOS launcher
+expect_file_lacks Emu/GBA/launch.stock.sh LODOR_ONION_LAUNCH
+expect_log seed: wrapped=1 skipped=0
+expect_file_has .tmp_update/startup/lodor.sh MARKER: LODOR_BOOT
+expect_file_has .tmp_update/checkoff/lodor.sh MARKER: LODOR_CHECKOFF

@@ -1,0 +1,12 @@
+# The daemon's charging gate: everything else green (creds, pending, wifi) but NOT charging
+# -> zero engine calls for the whole bounded run. (Fake empty /sys/class/power_supply.)
+desc syncd: not charging -> no engine call ever
+invoke syncd
+timeout 6
+charging off
+config paired
+wifi up
+pending Roms/GBA/Zelda.gba
+expect_timeout
+expect_log romm-syncd started
+expect_trace_absent ENGINE

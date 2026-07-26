@@ -1,0 +1,14 @@
+#!/bin/sh
+# cat shadow — the WLAN scripting seam. The onion lib has no LODOR_TEST_LIB hook (unlike
+# NextUI), and wifi_is_up reads /sys/class/net/wlan0/operstate directly — so the harness
+# intercepts EXACTLY that path and answers from the scripted wifi state ($LODOR_SIM_DIR/wifi).
+# Every other cat passes straight through to /bin/cat.
+for a in "$@"; do
+	case "$a" in
+		/sys/class/net/wlan0/operstate)
+			s="$(/bin/cat "${LODOR_SIM_DIR:?}/wifi" 2>/dev/null)"
+			if [ "$s" = up ]; then echo up; else echo down; fi
+			exit 0 ;;
+	esac
+done
+exec /bin/cat "$@"

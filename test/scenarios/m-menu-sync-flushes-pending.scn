@@ -1,0 +1,14 @@
+# "Sync now" with a non-empty offline queue flushes it FIRST (--push-pending), then mirrors.
+desc app menu: Sync now with pending queue -> --push-pending then --mirror-catalog
+invoke app
+config paired
+wifi up
+pending Roms/GBA/Zelda.gba
+engine 0|RESULT pushed=1
+engine 0|MIRROR created=0 updated=0\nRESULT ok
+pick 0
+pick 255
+expect_exit 0
+expect_trace ENGINE --push-pending
+expect_trace ENGINE --mirror-catalog
+expect_trace PANEL mode=auto title='Sync complete'

@@ -1,0 +1,16 @@
+# Launch is NEVER gated on sync: a failed restore shows the honest failure panel and the
+# game still launches.
+desc launch card: restore fails -> honest panel, game still launches
+invoke wrap
+config paired
+wifi up
+sdfile+ Roms/GBA/Zelda.gba
+engine 0|101\t2026-07-01 10:00\tBrick\t32KB\tCURRENT\nLOCAL=current
+engine 0|RESULT mode=list-states n=0
+engine 1|SYNCFAIL network
+pick 1
+expect_exit 0
+expect_trace ENGINE --sync-save
+expect_trace title='Couldn't restore save'
+expect_trace STOCK GBA rom=
+expect_log card restore-save rc=1

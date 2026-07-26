@@ -1,0 +1,14 @@
+# A failed push must not lose the save: rc!=0 -> the ROM is queued for the daemon retry.
+desc push: --sync-save fails -> queued for the daemon
+invoke wrap
+config paired
+wifi up
+sdfile+ Roms/GBA/Zelda.gba
+stockwrites Saves/CurrentProfile/saves/mGBA/Zelda.srm
+engine 0|LOCAL=current
+engine 0|RESULT mode=list-states n=0
+engine 4|SYNCFAIL upload
+expect_exit 0
+expect_trace ENGINE --sync-save
+expect_log save-push rc=4
+expect_file_has App/LodorSync/data/pending-saves.txt Zelda.gba

@@ -1,0 +1,8 @@
+#!/bin/sh
+# sleep — sim time compression, SCALED (not flattened): every sleep N becomes
+# N * LODOR_SIM_TICK real seconds (floor 0.01s). Scaling preserves RELATIVE timing, which
+# this lane needs: lc_prompt races a 15s idle watchdog against the prompt answer — a flat
+# tiny sleep would fire the watchdog before any scripted pick and auto-Play every card.
+# A genuinely unbounded loop still spins until the harness `timeout` kills the scenario.
+d="${1:-0}"
+exec /bin/sleep "$(awk -v d="$d" -v t="${LODOR_SIM_TICK:-0.02}" 'BEGIN { s = d * t; if (s < 0.01) s = 0.01; printf "%.3f", s }')"

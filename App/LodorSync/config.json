@@ -1,6 +1,6 @@
 {
-  "label": "Lodor Sync",
+  "label": "Lodor",
   "icon": "icon.png",
   "launch": "launch.sh",
-  "description": "Sync your RomM library - stub-mirror, download-on-launch, save sync"
+  "description": "RomM library sync for OnionOS - stub-mirror, download-on-launch, save sync"
 }

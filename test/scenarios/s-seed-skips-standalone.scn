@@ -1,0 +1,10 @@
+# Standalone emulators (no RetroArch reference) are LEFT UNTOUCHED — we never break a
+# launch we don't understand.
+desc seed: standalone emulator left unwrapped
+invoke seed
+emu PICO standalone
+sdfile Roms/PICO/game.p8
+expect_exit 0
+expect_file_lacks Emu/PICO/launch.sh MARKER: LODOR_ONION_LAUNCH
+expect_file_has Emu/PICO/launch.sh stock OnionOS launcher
+expect_log seed: wrapped=0 skipped=1

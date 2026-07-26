@@ -4,9 +4,11 @@
 # A tiny POSIX-sh loop (NOT a resident process - holds ~nothing, spawns the short-lived
 # engine per cycle). Launched DETACHED from .tmp_update/startup/ so it never delays boot.
 # Polls every POLL s, acts at most every INTERVAL s, and only when ALL gates hold: charging,
-# not in a game, credentials present, and the pending queue is non-empty. It PUSHES the
-# offline queue; it never pulls (pulls happen around launch / from the app, where context
-# is known). Saves are discovered by the engine's glob across every core folder.
+# not in a game, and credentials present. It PUSHES the offline save queue (when non-empty),
+# then does charging-pass background library work: --mirror-catalog (refresh the catalog) and
+# --prefetch-large (pre-warm large disc-image stubs OFF the launch path, T2.1). It never PULLS
+# saves (pulls happen around launch / from the app, where context is known). Saves are
+# discovered by the engine's glob across every core folder.
 set -u
 SELF_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 . "$SELF_DIR/../lib/romm-sync-lib.sh"
@@ -16,7 +18,10 @@ POLL=60
 INTERVAL="${ROMM_SYNC_INTERVAL:-1800}"   # act at most every 30 min
 last_attempt=$(date +%s)
 
-trap 'rm -f "$INGAME_LOCK" 2>/dev/null' EXIT INT TERM HUP QUIT
+# cleanup on EXIT only; signals EXIT EXPLICITLY (a signal trap that does not exit lets
+# the loop continue with the gates it just opened — reproduced by the test harness).
+trap 'wifi_release; rm -f "$INGAME_LOCK" 2>/dev/null' EXIT
+trap 'exit 143' INT TERM HUP QUIT
 
 log "romm-syncd started (interval=${INTERVAL}s, poll=${POLL}s)"
 
@@ -27,14 +32,41 @@ while :; do
 	is_charging   || continue
 	not_in_game   || continue
 	creds_present || continue
-	[ -s "$PENDING" ] || { last_attempt=$(date +%s); continue; }
+	# NOTE (T2.1): no empty-queue early-return anymore — a charging pass has background
+	# library work (mirror-catalog + prefetch-large) even with nothing pending. Every gate
+	# above still holds (charging, not-in-game, creds), so this never runs mid-game or off-charge.
 
+	# Transfer mutex FIRST (bg: the daemon never preempts a user action). BUSY must NOT
+	# consume the timer - a sync IS happening, just not ours; retry next poll. (canonical
+	# fleet mutex, romm-sync-lib.sh — serializes engine transfers vs the App's foreground
+	# Sync Now / around-launch push.)
+	wifi_acquire bg; acq=$?
+	if [ "$acq" = 2 ]; then
+		log "transfer mutex busy (another actor); retry next poll"
+		continue
+	fi
 	last_attempt=$(date +%s)
 	if wifi_bring_up; then
-		out="$(lodor_engine --push-pending 2>&1)"; rc=$?
+		# 1. flush the offline save queue (the daemon's original job) — only when non-empty.
+		if [ -s "$PENDING" ]; then
+			out="$(lodor_engine --push-pending 2>&1)"; rc=$?
+			printf '%s\n' "$out" >> "$LOG"
+			wifi_lock_refresh   # long cycle: keep the held lock's ts fresh between engine calls
+			log "push-pending rc=$rc"
+		fi
+		# 2. charging-pass background library work (T2.1): refresh the catalog, then pre-warm
+		#    large disc-image STUBS off the launch path. Best-effort (a failure just retries
+		#    next cycle); each keeps the held lock's ts fresh between the short-lived engine runs.
+		out="$(lodor_engine --mirror-catalog 2>&1)"; mrc=$?
 		printf '%s\n' "$out" >> "$LOG"
-		log "push-pending rc=$rc"
+		wifi_lock_refresh
+		log "mirror-catalog rc=$mrc"
+		out="$(lodor_engine --prefetch-large 2>&1)"; prc=$?
+		printf '%s\n' "$out" >> "$LOG"
+		wifi_lock_refresh
+		log "prefetch-large rc=$prc"
 	else
 		log "wifi unavailable; retry next interval"
 	fi
+	wifi_release
 done

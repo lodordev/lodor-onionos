@@ -1,0 +1,14 @@
+# B on the state picker goes back and the game launches; nothing is dispatched.
+desc launch card states: B on the second menu -> back, no dispatch, launches
+invoke wrap
+config paired
+wifi up
+sdfile+ Roms/GBA/Zelda.gba
+engine 0|LOCAL=none
+engine 0|LISTSTATE id=66 slot=1 compat=1 known=1 age=120 size=100 origin=lodor/onion/mgba/armhf why="-" name="s.state"\nRESULT mode=list-states n=1
+pick 1
+pick 255
+expect_exit 0
+expect_trace PROMPT[Restore a save state]
+expect_trace_absent ENGINE --pull-state
+expect_trace STOCK GBA rom=

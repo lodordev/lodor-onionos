@@ -1,0 +1,12 @@
+# Engine rc=3 (server unreachable) -> the SPECIFIC honest diagnosis, not a fake success.
+desc app menu: Sync now rc=3 -> honest "Couldn't reach your RomM server"
+invoke app
+config paired
+wifi up
+engine 3|
+pick 0
+pick 255
+expect_exit 0
+expect_trace ENGINE --mirror-catalog
+expect_trace PANEL mode=auto title='Sync failed'
+expect_trace reach your RomM server

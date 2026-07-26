@@ -1,0 +1,12 @@
+# Detect-and-reheal is idempotent: a second run re-copies the wrap (updates propagate) but
+# NEVER clobbers the preserved stock, and the boot hook is written once (4 lines), not
+# duplicated.
+desc seed: run twice -> stock intact, wrap re-copied, boot hook not duplicated
+invoke seed2
+emu GBA ra
+sdfile Roms/GBA/Zelda.gba
+expect_exit 0
+expect_file_has Emu/GBA/launch.sh MARKER: LODOR_ONION_LAUNCH
+expect_file_has Emu/GBA/launch.stock.sh stock OnionOS launcher
+expect_file_lacks Emu/GBA/launch.stock.sh LODOR_ONION_LAUNCH
+expect_file_lines .tmp_update/startup/lodor.sh 4

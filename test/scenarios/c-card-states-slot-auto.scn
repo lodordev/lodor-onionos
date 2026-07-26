@@ -1,0 +1,17 @@
+# A non-numeric slot (slot=auto) must NOT be passed: --state-slot is omitted and the
+# engine places by id alone.
+desc launch card states: slot=auto -> --state-slot omitted from the dispatch
+invoke wrap
+config paired
+wifi up
+sdfile+ Roms/GBA/Zelda.gba
+engine 0|LOCAL=none
+engine 0|LISTSTATE id=33 slot=auto compat=1 known=1 age=300 size=100 origin=lodor/onion/mgba/armhf why="-" name="auto.state"\nRESULT mode=list-states n=1
+engine 0|RESULT placedstate=1
+pick 1
+pick 0
+expect_exit 0
+expect_trace ENGINE --pull-state
+expect_trace --state-id 33
+expect_trace_absent --state-slot
+expect_trace STOCK GBA rom=

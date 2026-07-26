@@ -1,0 +1,18 @@
+# First-play safety (#135): LOCAL=none + server saves -> the newest save is pulled
+# SILENTLY before the card (nothing on the card to clobber), so a fresh device gets its
+# save even if the user just hits Play. The card then shows the normal restore row.
+desc launch card: first play (LOCAL=none) -> silent cloud pull before the card
+invoke wrap
+config paired
+wifi up
+sdfile+ Roms/GBA/Zelda.gba
+engine 0|202\t2026-07-02 08:00\tFlip\t33KB\nLOCAL=none
+engine 0|RESULT mode=list-states n=0
+engine 0|RESULT restored=1
+pick 0
+expect_exit 0
+expect_trace ENGINE --sync-save
+expect_trace Restore latest save
+expect_trace STOCK GBA rom=
+expect_log card first-play silent pull (LOCAL=none) game=Zelda.gba
+expect_log card action=PLAY

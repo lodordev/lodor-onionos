@@ -1,0 +1,74 @@
+#!/bin/sh
+# lodor-sync stub — the scripted ENGINE. Queue `engine`, line format: <rc>|<stdout>
+# (%b-expanded so scenarios can embed \t / \n for --list-saves rows / LISTSTATE lines).
+#
+# Engine-contract checks (the harness FAILS the scenario if any tag appears in the trace):
+#   BADCWD   — invoked with cwd != LODOR_PAK_DIR (config.json is loaded CWD-relative; every
+#              call must go through lodor_engine / the card's explicit `cd $DATA_DIR`)
+#   NOPAKDIR — LODOR_PAK_DIR not exported (lodor_export_env missing)
+#   NOSSL    — SSL_CERT_FILE not exported (HTTPS would die on-device)
+#
+# On rc=0 the stub MODELS the real engine's side effects:
+#   --register-device … + output registered=1 -> add "device_name" to config.json
+#   --download <path> + downloaded=1          -> fill the stub in place (DLBYTES); with
+#                                                discs_present= and a .m3u path, model the
+#                                                multi-disc shape instead: populate the .m3u
+#                                                and drop disc 1 into the dot-hidden per-game
+#                                                folder (folder-per-game, never a root disc)
+# All other modes have no side effects. Every call is traced with full argv.
+set -u
+T="${LODOR_SIM_DIR:?}/trace.log"
+
+env_tags=""
+[ -n "${LODOR_PAK_DIR:-}" ] || env_tags="$env_tags NOPAKDIR"
+[ -n "${LODOR_PAK_DIR:-}" ] && [ "$PWD" != "$LODOR_PAK_DIR" ] && env_tags="$env_tags BADCWD:$PWD"
+[ -n "${SSL_CERT_FILE:-}" ] || env_tags="$env_tags NOSSL"
+CFG="${LODOR_PAK_DIR:-$PWD}/config.json"
+
+line="$(simq engine)" || { echo "ENGINE $* UNDERRUN (no scripted result)$env_tags" >> "$T"; exit 45; }
+rc="${line%%|*}"
+out="${line#*|}"; [ "$out" = "$line" ] && out=""
+
+echo "ENGINE $* -> rc=$rc out='$out'$env_tags" >> "$T"
+[ -n "$out" ] && printf '%b\n' "$out"
+
+_arg_after_flag() {
+	_want="$1"; shift
+	while [ $# -gt 0 ]; do
+		if [ "$1" = "$_want" ]; then printf '%s' "${2:-}"; return 0; fi
+		shift
+	done
+	return 1
+}
+
+if [ "$rc" = 0 ]; then
+	case " $* " in
+		*" --register-device "*)
+			case "$out" in *registered=1*)
+				grep -q '"device_name"' "$CFG" 2>/dev/null || \
+					sed -i '/"root_uri"/a\      "device_name": "stub-device",' "$CFG"
+			esac
+			;;
+		*" --download "*)
+			case "$out" in *downloaded=1*)
+				f="$(_arg_after_flag --download "$@")"
+				case "$out" in
+					*discs_present=*)
+						# multi-disc: populated .m3u at the passed path + disc 1 in the
+						# dot-hidden per-game folder (the engine's folder-per-game shape).
+						if [ -n "$f" ]; then
+							_dir="$(dirname "$f")"; _stem="$(basename "$f" .m3u)"
+							mkdir -p "$_dir/.$_stem" 2>/dev/null
+							printf 'DISCBYTES\n' > "$_dir/.$_stem/$_stem (Disc 1).chd"
+							printf '.%s/%s (Disc 1).chd\n' "$_stem" "$_stem" > "$f"
+						fi
+						;;
+					*)
+						if [ -n "$f" ]; then mkdir -p "$(dirname "$f")" 2>/dev/null; printf 'DLBYTES\n' > "$f"; fi
+						;;
+				esac
+			esac
+			;;
+	esac
+fi
+exit "$rc"

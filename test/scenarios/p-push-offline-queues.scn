@@ -1,0 +1,15 @@
+# Offline-first: a quit never blocks on the radio. Save changed + dark -> the ROM is queued
+# for the daemon and the offline path is honestly logged. No engine call at all.
+desc push: save changed + offline -> save queued to pending-saves.txt, STATE queued via --queue-state
+invoke wrap
+config paired
+wifi down
+sdfile+ Roms/GBA/Zelda.gba
+stockwrites Saves/CurrentProfile/saves/mGBA/Zelda.srm
+engine 0|RESULT queuedstate=1
+expect_exit 0
+expect_trace STOCK GBA rom=
+expect_trace ENGINE --queue-state
+expect_file_has App/LodorSync/data/pending-saves.txt Zelda.gba
+expect_log save changed, offline -> queued pending
+expect_log state offline -> queued for daemon

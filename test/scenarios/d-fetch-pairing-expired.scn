@@ -1,0 +1,17 @@
+# Engine exit 6 = PAIRING_EXPIRED during fetch: no launch of the empty stub and config.json
+# is NEVER rewritten. PINS SHIPPED BEHAVIOR: this lane shows the generic failure panel —
+# the missing rc=6 special-casing (NextUI has an actionable message + re-pair banner) is a
+# reported finding, not silently "fixed" here.
+desc fetch: rc=6 pairing expired -> no launch, config untouched (generic panel — shipped)
+invoke wrap
+config paired
+wifi up
+sdfile Roms/GBA/Zelda.gba
+engine 6|PAIRING_EXPIRED
+expect_exit 0
+expect_trace ENGINE --download
+expect_file_empty Roms/GBA/Zelda.gba
+expect_trace_absent STOCK
+expect_config_has "token": "stub-token"
+expect_config_has "device_name": "stub-device"
+expect_trace PANEL mode=auto title='Download failed'

@@ -1,0 +1,16 @@
+# Honest result: no placedstate=1 in the RESULT -> "Couldn't place state" — and the game
+# still launches (never gated).
+desc launch card states: place fails -> honest panel, still launches
+invoke wrap
+config paired
+wifi up
+sdfile+ Roms/GBA/Zelda.gba
+engine 0|LOCAL=none
+engine 0|LISTSTATE id=77 slot=1 compat=1 known=1 age=120 size=100 origin=lodor/onion/mgba/armhf why="-" name="s.state"\nRESULT mode=list-states n=1
+engine 4|DLFAIL getstate
+pick 1
+pick 0
+expect_exit 0
+expect_trace ENGINE --pull-state
+expect_trace title='Couldn't place state'
+expect_trace STOCK GBA rom=

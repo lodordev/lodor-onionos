@@ -1,0 +1,13 @@
+# Recent activity: --recent rows rendered as a read-only prompt list (A/B just exit).
+desc app menu: Recent activity -> --recent feed shown read-only
+invoke app
+config paired
+wifi up
+engine 0|2026-07-20 Brick pushed Zelda\n2026-07-21 Flip pulled Metroid
+pick 4
+pick 255
+expect_exit 0
+expect_trace ENGINE --recent
+expect_trace PROMPT[Recent activity]
+expect_trace pushed Zelda
+expect_trace pulled Metroid

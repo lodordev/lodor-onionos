@@ -1,0 +1,14 @@
+# compat=0 states (wrong core/arch) are FILTERED: with only incompatible states and no
+# saves there is nothing to offer -> card skipped, launch proceeds.
+desc launch card states: all compat=0 -> filtered out, no card
+invoke wrap
+config paired
+wifi up
+sdfile+ Roms/GBA/Zelda.gba
+engine 0|LOCAL=none
+engine 0|LISTSTATE id=55 slot=1 compat=0 known=0 age=60 size=100 origin=lodor/knulli/gpsp/arm64 why="different architecture" name="foreign.state"\nRESULT mode=list-states n=1
+expect_exit 0
+expect_trace_absent PROMPT[
+expect_trace_absent ENGINE --pull-state
+expect_trace STOCK GBA rom=
+expect_log card skipped (only Play

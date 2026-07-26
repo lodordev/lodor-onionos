@@ -1,0 +1,12 @@
+#!/bin/sh
+# ip shadow — the other half of the wifi_is_up probe: `ip addr show wlan0 | grep "inet "`.
+# Answers from the scripted wifi state; any other `ip` usage is a no-op (the lane scripts
+# only ever query wlan0, and the CI host's real ip must never leak into a scenario).
+case "$*" in
+	*"addr show wlan0"*)
+		if [ "$(/bin/cat "${LODOR_SIM_DIR:?}/wifi" 2>/dev/null)" = up ]; then
+			echo "    inet 10.0.0.42/24 brd 10.0.0.255 scope global wlan0"
+		fi
+		exit 0 ;;
+esac
+exit 0

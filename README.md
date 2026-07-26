@@ -1,9 +1,9 @@
 # Lodor-OnionOS integration (Miyoo Mini Plus, SigmaStar SSD202D)
 
-**Status: active lane, not yet published from this repository.** Archived 2026-07-03, un-archived by
-maintainer decision 2026-07-20. The build side is real — `release.sh` assembles `Lodor-OnionOS-<version>.zip`
-on every release run and the lane is gated in CI — but no versioned release has been cut on this repo yet, so
-the artifact is only available from the umbrella release page. The engine `-tags onion` variant, this App
+**Status (0.9.8.2, 2026-07-20): shipping lane.** Archived 2026-07-03, un-archived by maintainer
+decision 2026-07-20 — OnionOS builds and releases with the same parity contract as every other lane
+(release.sh assembles `Lodor-OnionOS-<version>.zip` unconditionally; publish-lanes.sh syncs + cuts
+the lodor-onionos release; repo-parity fails if it lags). The engine `-tags onion` variant, this App
 tree, and the on-screen menu are fully built and hard-gated. **Validation honesty:** stub-mirror is
 proven on Miyoo Mini Plus hardware (library shows, 0-byte stubs launch); the full pipeline
 (download-on-launch, save sync) has been validated **off-hardware only** — on-device validation of
@@ -12,13 +12,27 @@ that path is still pending (see "Hardware-deferred" below).
 No-fork OnionOS App that drives the portable Lodor engine. Stub-mirror is PROVEN on hardware (library
 shows + 0-byte stubs launch). Full RomM pipeline validated from a CA-having host.
 
-## Current release
+## Launch card v2 (2026-07-13, feature/onion-revive)
+The engine's per-game launch card now shows on EVERY game launch, matching muOS/NextUI/LodorOS. The
+per-system launch wrap (`bin/lodor-launch.sh`, installed as `Emu/<TAG>/launch.sh`) — after the stub
+fetch, before it hands off to the stock RetroArch launcher — invokes `lodor-wizard --launch-card
+--summoned <rom>` with `LODOR_HOST_OS=onion`. That selects the **DefaultKeyMap** (Miyoo keyboard input:
+`57` KEY_SPACE=Confirm, `29` KEY_LCTRL=Back, arrows=dpad — already correct for the Mini on OnionOS) and
+the **raw `/dev/fb0`** display lane (the Mini is a raw-fb device; this is NOT the NextUI SDL lane). The
+card is OPPORTUNISTIC (never a cold Wi-Fi bring-up) and FAIL-SAFE: wizard missing / fb / input / probe /
+timeout all fall through to a normal launch — launching is never gated on sync. When the wizard is absent
+the wrap degrades to the proven silent `--sync-save` pull. `lodor-wizard` (armhf, onion tag) ships in
+`App/LodorSync/`, built by `release.sh` (`WIZ_ONION_ARMHF`).
 
-**No release has been cut from this repository yet.** The OnionOS lane builds and is gated in CI, and its parity
-work is merged, but no versioned artifact has been published here. Use the umbrella release page if you need the
-OnionOS zip for a given version.
+The App's own on-screen menu (`bin/lodor-menu`, below) is a DIFFERENT surface — the Apps-tab main screen
+(Sync / Refresh / Library mode / Settings). The launch card is the per-game pre-launch surface. Both are
+kept; they don't overlap.
 
-The 1.0 alpha currently covers muOS, LodorOS, and NextUI; OnionOS is expected to follow.
+## Transfer mutex (fleet-canonical, reconciled 2026-07-13)
+The lib now carries the fleet `wifi_acquire`/`wifi_release`/`wifi_lock_refresh` transfer mutex (byte-for-
+byte from the muOS/NextUI/Knulli/LodorOS libs — onion was the only lane missing it). `romm-syncd`
+acquires it `bg` (yields to any user action); the App holds it `fg` for its session so the background
+daemon sees BUSY and never clobbers a user's Sync Now / around-launch push.
 
 ## Shipped fix vs the old pak
 `App/LodorSync/certs/ca-certificates.crt` is now bundled. The on-device blocker was that the static Go

@@ -1,0 +1,11 @@
+# Sync with Wi-Fi never set up in OnionOS: the SPECIFIC rc=2 message pointing at OnionOS's
+# own Wi-Fi settings — never a reimplemented creds flow, never an engine call.
+desc app menu: Wi-Fi not set up -> honest message, no engine call
+invoke app
+config paired
+wifi down
+pick 0
+pick 255
+expect_exit 0
+expect_trace Wi-Fi isn't set up yet
+expect_trace_absent ENGINE

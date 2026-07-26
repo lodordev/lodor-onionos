@@ -1,0 +1,21 @@
+# State second-menu: compat=1 states sorted NEWEST-FIRST; picking the top row dispatches
+# --pull-state with that state's id AND its numeric slot.
+desc launch card states: newest-first picker, --pull-state --state-id + --state-slot
+invoke wrap
+config paired
+wifi up
+sdfile+ Roms/GBA/Zelda.gba
+engine 0|LOCAL=none
+engine 0|LISTSTATE id=11 slot=1 compat=1 known=1 age=7200 size=100 origin=lodor/onion/mgba/armhf why="-" name="older.state"\nLISTSTATE id=22 slot=2 compat=1 known=1 age=60 size=100 origin=lodor/onion/mgba/armhf why="-" name="newer.state"\nRESULT mode=list-states n=2
+engine 0|RESULT placedstate=1
+pick 1
+pick 0
+expect_exit 0
+expect_trace PROMPT[Restore a save state]
+expect_trace "newer.state"  -  1m ago|"older.state"  -  2h ago
+expect_trace ENGINE --pull-state
+expect_trace --state-id 22
+expect_trace --state-slot 2
+expect_trace PANEL mode=auto title='State ready'
+expect_trace STOCK GBA rom=
+expect_log card pull-state id=22 slot=2 rc=0

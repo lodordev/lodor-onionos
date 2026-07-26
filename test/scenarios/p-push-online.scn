@@ -1,0 +1,16 @@
+# Post-game bracket: RetroArch (the recorder stock) wrote a changed save; Wi-Fi is up ->
+# --sync-save fires AFTER the game exits and nothing is queued.
+desc push: save changed + online -> --sync-save after exit, no queue
+invoke wrap
+config paired
+wifi up
+sdfile+ Roms/GBA/Zelda.gba
+stockwrites Saves/CurrentProfile/saves/mGBA/Zelda.srm
+engine 0|LOCAL=current
+engine 0|RESULT mode=list-states n=0
+engine 0|RESULT pushed=1
+expect_exit 0
+expect_trace STOCK GBA rom=
+expect_trace ENGINE --sync-save
+expect_log save-push rc=0
+expect_file_absent App/LodorSync/data/pending-saves.txt

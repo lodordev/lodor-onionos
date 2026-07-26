@@ -1,0 +1,17 @@
+# Restore-latest-save dispatch: picking the save row runs --sync-save (newest wins),
+# shows the honest result panel, and STILL launches.
+desc launch card: Restore latest save -> --sync-save dispatch, result panel, launches
+invoke wrap
+config paired
+wifi up
+sdfile+ Roms/GBA/Zelda.gba
+engine 0|101\t2026-07-01 10:00\tBrick\t32KB\tCURRENT\nLOCAL=current
+engine 0|RESULT mode=list-states n=0
+engine 0|RESULT restored=1 pushed=0
+pick 1
+expect_exit 0
+expect_trace ENGINE --sync-save
+expect_trace PANEL mode=auto title='Save restored'
+expect_trace STOCK GBA rom=
+expect_log card restore-save rc=0
+expect_log card action=RESTORE_SAVE

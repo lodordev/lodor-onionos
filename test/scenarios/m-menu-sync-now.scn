@@ -1,0 +1,18 @@
+# App menu "Sync now": empty pending queue -> NO --push-pending, just --mirror-catalog with
+# the honest engine-driven progress panel; success stamps last-sync.txt and shows the real
+# MIRROR summary line.
+desc app menu: Sync now -> --mirror-catalog only (queue empty), honest summary
+invoke app
+config paired
+wifi up
+engine 0|MIRROR created=5 updated=2\nRESULT ok
+pick 0
+pick 255
+expect_exit 0
+expect_trace PROMPT[Lodor]
+expect_trace Sync now|Refresh library|Download a game|Pull saves from server|Recent activity|Settings ▸
+expect_trace ENGINE --mirror-catalog
+expect_trace_absent ENGINE --push-pending
+expect_trace PANEL mode=auto title='Sync complete'
+expect_trace MIRROR created=5
+expect_file App/LodorSync/data/last-sync.txt

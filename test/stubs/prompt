@@ -1,0 +1,40 @@
+#!/bin/sh
+# prompt stub — OnionOS's SDL list picker, scripted via the `prompt` queue. The REAL
+# contract is exit-code-as-selection: 0..N-1 = chosen item, 255 = B/cancel. Queue lines:
+#   <n>    exit with that code (validated: a selection must be a REAL index, catching
+#          label/dispatch drift between the built item list and the case patterns)
+#   255    cancel (B)
+#   hang   never return — exercises lc_prompt's idle auto-Play watchdog (TERM -> 255,
+#          exactly what a signal-killed prompt looks like to the caller)
+# Every call is traced with the full item list so scenarios can pin exact labels.
+set -u
+T="${LODOR_SIM_DIR:?}/trace.log"
+title=""; items=""; n=0
+while [ $# -gt 0 ]; do
+	case "$1" in
+		-t) title="${2:-}"; shift 2 ;;
+		-m) shift 2 ;;
+		-s) shift 2 ;;
+		*)  items="$items|$1"; n=$((n+1)); shift ;;
+	esac
+done
+items="${items#|}"
+
+line="$(simq prompt)" || { echo "PROMPT[$title] n=$n items='$items' UNDERRUN (no scripted answer)" >> "$T"; exit 254; }
+
+if [ "$line" = hang ]; then
+	echo "PROMPT[$title] n=$n items='$items' -> HANG (waiting for the watchdog)" >> "$T"
+	trap 'exit 255' TERM INT
+	/bin/sleep 30 &
+	wait $!
+	exit 255
+fi
+case "$line" in
+	''|*[!0-9]*) echo "PROMPT[$title] BAD SCRIPT LINE '$line'" >> "$T"; exit 254 ;;
+esac
+if [ "$line" != 255 ] && [ "$line" -ge "$n" ]; then
+	echo "PROMPT[$title] SELECTION OUT OF RANGE $line (n=$n items='$items')" >> "$T"
+	exit 254
+fi
+echo "PROMPT[$title] n=$n items='$items' -> rc=$line" >> "$T"
+exit "$line"

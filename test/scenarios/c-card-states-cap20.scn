@@ -1,0 +1,14 @@
+# The state picker is CAPPED at 20 rows (newest-first head -20): 22 compat states in
+# -> exactly 20 ids staged for the picker.
+desc launch card states: 22 compat states -> capped at 20 rows
+invoke wrap
+config paired
+wifi up
+sdfile+ Roms/GBA/Zelda.gba
+engine 0|LOCAL=none
+engine 0|LISTSTATE id=1 slot=1 compat=1 known=1 age=100 size=100 origin=lodor/onion/mgba/armhf why="-" name="s1.state"\nLISTSTATE id=2 slot=1 compat=1 known=1 age=200 size=100 origin=lodor/onion/mgba/armhf why="-" name="s2.state"\nLISTSTATE id=3 slot=1 compat=1 known=1 age=300 size=100 origin=lodor/onion/mgba/armhf why="-" name="s3.state"\nLISTSTATE id=4 slot=1 compat=1 known=1 age=400 size=100 origin=lodor/onion/mgba/armhf why="-" name="s4.state"\nLISTSTATE id=5 slot=1 compat=1 known=1 age=500 size=100 origin=lodor/onion/mgba/armhf why="-" name="s5.state"\nLISTSTATE id=6 slot=1 compat=1 known=1 age=600 size=100 origin=lodor/onion/mgba/armhf why="-" name="s6.state"\nLISTSTATE id=7 slot=1 compat=1 known=1 age=700 size=100 origin=lodor/onion/mgba/armhf why="-" name="s7.state"\nLISTSTATE id=8 slot=1 compat=1 known=1 age=800 size=100 origin=lodor/onion/mgba/armhf why="-" name="s8.state"\nLISTSTATE id=9 slot=1 compat=1 known=1 age=900 size=100 origin=lodor/onion/mgba/armhf why="-" name="s9.state"\nLISTSTATE id=10 slot=1 compat=1 known=1 age=1000 size=100 origin=lodor/onion/mgba/armhf why="-" name="s10.state"\nLISTSTATE id=11 slot=1 compat=1 known=1 age=1100 size=100 origin=lodor/onion/mgba/armhf why="-" name="s11.state"\nLISTSTATE id=12 slot=1 compat=1 known=1 age=1200 size=100 origin=lodor/onion/mgba/armhf why="-" name="s12.state"\nLISTSTATE id=13 slot=1 compat=1 known=1 age=1300 size=100 origin=lodor/onion/mgba/armhf why="-" name="s13.state"\nLISTSTATE id=14 slot=1 compat=1 known=1 age=1400 size=100 origin=lodor/onion/mgba/armhf why="-" name="s14.state"\nLISTSTATE id=15 slot=1 compat=1 known=1 age=1500 size=100 origin=lodor/onion/mgba/armhf why="-" name="s15.state"\nLISTSTATE id=16 slot=1 compat=1 known=1 age=1600 size=100 origin=lodor/onion/mgba/armhf why="-" name="s16.state"\nLISTSTATE id=17 slot=1 compat=1 known=1 age=1700 size=100 origin=lodor/onion/mgba/armhf why="-" name="s17.state"\nLISTSTATE id=18 slot=1 compat=1 known=1 age=1800 size=100 origin=lodor/onion/mgba/armhf why="-" name="s18.state"\nLISTSTATE id=19 slot=1 compat=1 known=1 age=1900 size=100 origin=lodor/onion/mgba/armhf why="-" name="s19.state"\nLISTSTATE id=20 slot=1 compat=1 known=1 age=2000 size=100 origin=lodor/onion/mgba/armhf why="-" name="s20.state"\nLISTSTATE id=21 slot=1 compat=1 known=1 age=2100 size=100 origin=lodor/onion/mgba/armhf why="-" name="s21.state"\nLISTSTATE id=22 slot=1 compat=1 known=1 age=2200 size=100 origin=lodor/onion/mgba/armhf why="-" name="s22.state"\nRESULT mode=list-states n=22
+pick 0
+expect_exit 0
+expect_trace Restore a save state
+expect_trace STOCK GBA rom=
+expect_tmp_lines /tmp/lodor-lc-states.ids 20

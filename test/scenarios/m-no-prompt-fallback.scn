@@ -1,0 +1,13 @@
+# Degrade, don't dead-end: if the `prompt` binary is missing from the card, the App falls
+# back to the auto-sync-on-open behaviour instead of a blank screen.
+desc app menu: prompt binary missing -> auto-sync fallback, no menu
+invoke app
+config paired
+wifi up
+no-prompt
+engine 0|MIRROR created=1 updated=0\nRESULT ok
+expect_exit 0
+expect_trace_absent PROMPT[
+expect_trace ENGINE --mirror-catalog
+expect_trace PANEL mode=auto title='Sync complete'
+expect_log prompt picker not found

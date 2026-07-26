@@ -1,0 +1,15 @@
+# No save-FILE change this session -> no --sync-save, nothing queued to pending-saves.txt. BUT
+# the STATE push is DECOUPLED from the save-file gate (T1.1): a quicksave-only session writes no
+# .srm yet its state must still go up, so --push-states fires online regardless. Proves the moat.
+desc push: save unchanged -> no --sync-save, but decoupled --push-states still fires
+invoke wrap
+config paired
+wifi up
+sdfile+ Roms/GBA/Zelda.gba
+engine 0|LOCAL=current
+engine 0|RESULT mode=list-states n=0
+expect_exit 0
+expect_trace STOCK GBA rom=
+expect_trace_absent ENGINE --sync-save
+expect_trace ENGINE --push-states
+expect_file_absent App/LodorSync/data/pending-saves.txt
