@@ -1,9 +1,9 @@
 # Lodor-OnionOS integration (Miyoo Mini Plus, SigmaStar SSD202D)
 
-**Status (0.9.8.2, 2026-07-20): shipping lane.** Archived 2026-07-03, un-archived by maintainer
-decision 2026-07-20 — OnionOS builds and releases with the same parity contract as every other lane
-(release.sh assembles `Lodor-OnionOS-<version>.zip` unconditionally; publish-lanes.sh syncs + cuts
-the lodor-onionos release; repo-parity fails if it lags). The engine `-tags onion` variant, this App
+**Status: active lane, not yet published from this repository.** Archived 2026-07-03, un-archived by
+maintainer decision 2026-07-20. The build side is real — `release.sh` assembles `Lodor-OnionOS-<version>.zip`
+on every release run and the lane is gated in CI — but no versioned release has been cut on this repo yet, so
+the artifact is only available from the umbrella release page. The engine `-tags onion` variant, this App
 tree, and the on-screen menu are fully built and hard-gated. **Validation honesty:** stub-mirror is
 proven on Miyoo Mini Plus hardware (library shows, 0-byte stubs launch); the full pipeline
 (download-on-launch, save sync) has been validated **off-hardware only** — on-device validation of
@@ -11,6 +11,14 @@ that path is still pending (see "Hardware-deferred" below).
 
 No-fork OnionOS App that drives the portable Lodor engine. Stub-mirror is PROVEN on hardware (library
 shows + 0-byte stubs launch). Full RomM pipeline validated from a CA-having host.
+
+## Current release
+
+**No release has been cut from this repository yet.** The OnionOS lane builds and is gated in CI, and its parity
+work is merged, but no versioned artifact has been published here. Use the umbrella release page if you need the
+OnionOS zip for a given version.
+
+The 1.0 alpha currently covers muOS, LodorOS, and NextUI; OnionOS is expected to follow.
 
 ## Shipped fix vs the old pak
 `App/LodorSync/certs/ca-certificates.crt` is now bundled. The on-device blocker was that the static Go
